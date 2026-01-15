@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess Feed — Demo</title>
+    <link rel="icon" href="icon.png">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card: #f8f9fa;
+            --muted: #6c757d;
+            --accent: #007bff;
+            --glass: rgba(0, 0, 0, 0.05)
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            font-family: Inter, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: #fafbfc;
+            color: #212529;
+            margin: 0;
+            padding: 28px;
+            display: flex;
+            justify-content: center
+        }
+
+        .wrap {
+            width: 980px
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 20px
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .stats-section {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08)
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+            transform: translateY(-2px)
+        }
+
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 4px
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 18px
+        }
+
+        .post {
+            background: var(--card);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+            cursor: pointer
+        }
+
+        .post:hover {
+            border-color: rgba(0, 123, 255, 0.25);
+            background: rgba(0, 123, 255, 0.02)
+        }
+
+        .board-img {
+            width: 240px;
+            height: 240px;
+            flex: 0 0 240px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f3f4f6;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            cursor: pointer
+        }
+
+        .post:hover .board-img {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12)
+        }
+
+        .board-img img {
+            display: block
+        }
+
+        .meta {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .meta h2 {
+            margin: 0;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            font-weight: 600;
+            line-height: 1.3
+        }
+
+        .meta h2 span:last-child {
+            font-size: 14px;
+            flex-shrink: 0
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 500;
+            margin: 0
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 0;
+            margin: 0
+        }
+
+        .stat {
+            background: rgba(0, 123, 255, 0.06);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #212529;
+            border: 1px solid rgba(0, 123, 255, 0.12);
+            transition: all 0.2s ease;
+            cursor: default
+        }
+
+        .stat:hover {
+            background: rgba(0, 123, 255, 0.1);
+            border-color: rgba(0, 123, 255, 0.25);
+            transform: translateY(-1px)
+        }
+
+        .pieces {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px
+        }
+
+        .pieces > div {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .pieces .list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 6px;
+            align-items: center;
+            min-height: 32px;
+            justify-content: flex-start
+        }
+
+        .pieces .list span:only-child {
+            color: var(--muted);
+            font-size: 11px;
+            width: 100%
+        }
+
+        .pill {
+            background: transparent;
+            padding: 6px 8px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted)
+        }
+
+        footer {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 18px;
+            text-align: center
+        }
+
+        /* small screens */
+        @media (max-width:880px) {
+            .wrap {
+                width: 100%;
+                padding: 16px
+            }
+
+            .post {
+                flex-direction: column
+            }
+
+            .board-img {
+                width: 100%;
+                height: 320px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- Test comment -->
+        <header>
+            <img src="icon.png" alt="Chess Feed icon" style="width:56px;height:56px;border-radius:12px;">
+            <div class="brand">
+                <h1>Chess Feed</h1>
+                <p>Recent chess games — final boards, captures, and scores</p>
+            </div>
+        </header>
+
+        <div id="stats" class="stats-section"></div>
+
+        <main class="feed" id="feed"></main>
+
+        <footer>Open this file in a browser to preview the feed.</footer>
+    </div>
+
+    <script>
+        // Sample feed data: finalFEN should represent final position after game
+        const sampleGames = [
+            {
+                id: 1,
+                white: 'You',
+                black: 'Ava',
+                result: '1-0',
+                moves: 42,
+                finalFEN: 'r1bq1rk1/pp2bppp/2n1pn2/2pp4/3P1B2/2NB1N2/PPP2PPP/R2Q1RK1 w - - 0 12',
+                duration: '38m',
+                timestamp: 'Oct 10, 2023 at 2:45 PM'
+            },
+            {
+                id: 2,
+                white: 'Ben',
+                black: 'You',
+                result: '0-1',
+                moves: 67,
+                finalFEN: '8/5pp1/6k1/5P2/6p1/5K2/8/8 b - - 0 1',
+                duration: '1h 12m',
+                timestamp: 'Oct 11, 2023 at 4:20 PM'
+            },
+            {
+                id: 3,
+                white: 'You',
+                black: 'Cara',
+                result: '1/2-1/2',
+                moves: 95,
+                finalFEN: '6k1/5pp1/4p2p/1P1pP3/8/5KP1/8/8 w - - 0 1',
+                duration: '2h 5m',
+                timestamp: 'Oct 12, 2023 at 7:15 PM'
+            },
+            {
+                id: 4,
+                white: 'Dan',
+                black: 'Eva',
+                result: '1-0',
+                moves: 35,
+                finalFEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                duration: '25m',
+                timestamp: 'Oct 13, 2023 at 11:30 AM'
+            },
+            {
+                id: 5,
+                white: 'Frank',
+                black: 'Gina',
+                result: '0-1',
+                moves: 50,
+                finalFEN: 'r3k2r/pppq1ppp/2np1n2/2b1p3/2B1P3/2NP1N2/PPPQ1PPP/R3K2R w KQkq - 0 8',
+                duration: '45m',
+                timestamp: 'Oct 14, 2023 at 3:10 PM'
+            },
+            {
+                id: 6,
+                white: 'You',
+                black: 'Hana',
+                result: '1-0',
+                moves: 28,
+                finalFEN: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2NP1N2/PPP2PPP/R1BQK2R w KQkq - 0 6',
+                duration: '22m',
+                timestamp: 'Oct 15, 2023 at 1:50 PM'
+            },
+            {
+                id: 7,
+                white: 'Ian',
+                black: 'Jill',
+                result: '1/2-1/2',
+                moves: 80,
+                finalFEN: '8/8/8/8/8/8/8/8 w - - 0 1',
+                duration: '1h 15m',
+                timestamp: 'Oct 16, 2023 at 6:00 PM'
+            },
+            {
+                id: 8,
+                white: 'You',
+                black: 'Karl',
+                result: '0-1',
+                moves: 55,
+                finalFEN: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+                duration: '50m',
+                timestamp: 'Oct 17, 2023 at 9:30 AM'
+            }
+        ];
+
+        // Compute top-level stats
+        let totalGames = sampleGames.length;
+        let yourGames = sampleGames.filter(g => g.white === 'You' || g.black === 'You').length;
+        let yourWins = sampleGames.filter(g => (g.white === 'You' && g.result === '1-0') || (g.black === 'You' && g.result === '0-1')).length;
+        let draws = sampleGames.filter(g => g.result === '1/2-1/2').length;
+        let totalMoves = sampleGames.reduce((sum, g) => sum + g.moves, 0);
+        let avgMoves = Math.round(totalMoves / totalGames);
+
+        // Render stats
+        const statsEl = document.getElementById('stats');
+        const statCards = [
+            { number: totalGames, label: 'Total Games' },
+            { number: yourGames, label: 'Your Games' },
+            { number: yourWins, label: 'Your Wins' },
+            { number: draws, label: 'Draws' },
+            { number: avgMoves, label: 'Avg Moves' }
+        ];
+        statCards.forEach(card => {
+            const div = document.createElement('div');
+            div.className = 'stat-card';
+            div.innerHTML = `<div class="number">${card.number}</div><div class="label">${card.label}</div>`;
+            statsEl.appendChild(div);
+        });
+
+        // Unicode piece mapping: uppercase = White, lowercase = Black
+        const pieceMap = {
+            'K': '\u2654', 'Q': '\u2655', 'R': '\u2656', 'B': '\u2657', 'N': '\u2658', 'P': '\u2659',
+            'k': '\u265A', 'q': '\u265B', 'r': '\u265C', 'b': '\u265D', 'n': '\u265E', 'p': '\u265F'
+        };
+
+        function parseFEN(fen) {
+            const board = [];
+            const parts = fen.split(' ');
+            const rows = parts[0].split('/');
+            for (let r = 0; r < 8; r++) {
+                const row = [];
+                for (const ch of rows[r]) {
+                    if (/\d/.test(ch)) {
+                        const n = parseInt(ch, 10);
+                        for (let i = 0; i < n; i++) row.push(null);
+                    } else row.push(ch);
+                }
+                board.push(row);
+            }
+            return board;
+        }
+
+        function countPieces(board) {
+            const counts = {};
+            for (const row of board) {
+                for (const p of row) {
+                    if (!p) continue;
+                    counts[p] = (counts[p] || 0) + 1;
+                }
+            }
+            return counts;
+        }
+
+        const startingCounts = { P: 8, R: 2, N: 2, B: 2, Q: 1, K: 1, p: 8, r: 2, n: 2, b: 2, q: 1, k: 1 };
+
+        function computeCaptures(boardCounts) {
+            const captured = { white: [], black: [] };
+            // white captured black pieces: missing from black starting counts
+            const blackLetters = ['p', 'r', 'n', 'b', 'q', 'k'];
+            blackLetters.forEach(letter => {
+                const have = boardCounts[letter] || 0;
+                const start = startingCounts[letter] || 0;
+                const missing = start - have;
+                for (let i = 0; i < missing; i++) captured.white.push(pieceMap[letter]);
+            });
+            const whiteLetters = ['P', 'R', 'N', 'B', 'Q', 'K'];
+            whiteLetters.forEach(letter => {
+                const have = boardCounts[letter] || 0;
+                const start = startingCounts[letter] || 0;
+                const missing = start - have;
+                for (let i = 0; i < missing; i++) captured.black.push(pieceMap[letter]);
+            });
+            return captured;
+        }
+
+        function materialScore(boardCounts) {
+            const values = { P: 1, N: 3, B: 3, R: 5, Q: 9, p: 1, n: 3, b: 3, r: 5, q: 9 };
+            let white = 0, black = 0;
+            Object.keys(boardCounts).forEach(k => {
+                const c = boardCounts[k];
+                if (k === k.toUpperCase()) white += (values[k] || 0) * c;
+                else black += (values[k] || 0) * c;
+            });
+            return { white, black, diff: white - black };
+        }
+
+        function renderBoardToCanvas(fen, size = 240) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const board = parseFEN(fen);
+            const sq = size / 8;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const light = (r + c) % 2 === 0;
+                    ctx.fillStyle = light ? '#f0d9b5' : '#b58863';
+                    ctx.fillRect(c * sq, r * sq, sq, sq);
+                    const p = board[r][c];
+                    if (p) {
+                        ctx.fillStyle = p === p.toUpperCase() ? '#fff' : '#000';
+                        ctx.font = Math.floor(sq * 0.7) + 'px serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const piece = pieceMap[p] || '?';
+                        ctx.fillText(piece, c * sq + sq / 2, r * sq + sq / 2 + sq * 0.03);
+                    }
+                }
+            }
+            // add subtle border
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, size, size);
+            return canvas.toDataURL('image/png');
+        }
+
+        function renderPost(game) {
+            const post = document.createElement('article');
+            post.className = 'post';
+
+            const imgWrap = document.createElement('div');
+            imgWrap.className = 'board-img';
+            const img = document.createElement('img');
+            img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+            img.alt = `Final board for game ${game.id}`;
+            img.src = renderBoardToCanvas(game.finalFEN, 480);
+            imgWrap.appendChild(img);
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const title = document.createElement('h2');
+            title.innerHTML = `<span>${game.white} vs ${game.black} — ${game.result}</span><span style="font-size: 14px; color: var(--muted);">${game.timestamp}</span>`;
+            const sub = document.createElement('div');
+            sub.className = 'sub';
+            sub.textContent = `${game.moves} moves · ${game.duration}`;
+
+            const counts = countPieces(parseFEN(game.finalFEN));
+            const captures = computeCaptures(counts);
+            const mat = materialScore(counts);
+
+            const stats = document.createElement('div');
+            stats.className = 'stats';
+            const s1 = document.createElement('div'); s1.className = 'stat'; s1.textContent = `Material: White ${mat.white} · Black ${mat.black}`;
+            const s2 = document.createElement('div'); s2.className = 'stat'; s2.textContent = `Result: ${game.result}`;
+            const s3 = document.createElement('div'); s3.className = 'stat'; s3.textContent = `Captures: ${captures.white.length + captures.black.length}`;
+            stats.appendChild(s1); stats.appendChild(s2); stats.appendChild(s3);
+
+            const pieces = document.createElement('div'); pieces.className = 'pieces';
+            const left = document.createElement('div'); left.className = 'list';
+            const right = document.createElement('div'); right.className = 'list';
+            const leftLabel = document.createElement('div'); leftLabel.className = 'pill'; leftLabel.textContent = `${game.white} took:`;
+            const rightLabel = document.createElement('div'); rightLabel.className = 'pill'; rightLabel.textContent = `${game.black} took:`;
+            captures.white.forEach(p => { const e = document.createElement('span'); e.textContent = p; e.style.fontSize = '24px'; left.appendChild(e) });
+            captures.black.forEach(p => { const e = document.createElement('span'); e.textContent = p; e.style.fontSize = '24px'; right.appendChild(e) });
+            
+            // Show empty state for no captures
+            if (captures.white.length === 0) { const none = document.createElement('span'); none.textContent = '— No pieces captured'; left.appendChild(none) }
+            if (captures.black.length === 0) { const none = document.createElement('span'); none.textContent = '— No pieces captured'; right.appendChild(none) }
+
+            meta.appendChild(title); meta.appendChild(sub); meta.appendChild(stats);
+            meta.appendChild(leftLabel); meta.appendChild(left);
+            meta.appendChild(rightLabel); meta.appendChild(right);
+
+            post.appendChild(imgWrap); post.appendChild(meta);
+            return post;
+        }
+
+        function scoreText(result, isWhitePlayer) {
+            if (result === '1-0') return isWhitePlayer ? 'Win (+1)' : 'Loss (0)';
+            if (result === '0-1') return isWhitePlayer ? 'Loss (0)' : 'Win (+1)';
+            return 'Draw (+0.5)';
+        }
+
+        // render feed
+        const feed = document.getElementById('feed');
+        sampleGames.forEach(g => {
+            const node = renderPost(g);
+            feed.appendChild(node);
+        });
+    </script>
+</body>
+
+</html>

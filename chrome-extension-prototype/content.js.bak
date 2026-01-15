@@ -1,0 +1,420 @@
+console.log("[Antigravity Overlay] Loaded.");
+
+if (window.__antigravityOverlayLoaded) {
+    console.log("[Antigravity Overlay] Already loaded.");
+} else {
+    window.__antigravityOverlayLoaded = true;
+    init();
+}
+
+function init() {
+    console.log("[Antigravity Overlay] Initializing Batch UI...");
+
+    // Create the Shadow Host
+    const host = document.createElement('div');
+    host.id = 'antigravity-overlay-host';
+    Object.assign(host.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+        pointerEvents: 'none',
+        zIndex: '2147483647', // Max Z-Index
+    });
+    document.body.appendChild(host);
+
+    // Create Shadow Root
+    const shadow = host.attachShadow({ mode: 'open' });
+
+    // Styles
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Reticle for Hover */
+        .reticle {
+            position: absolute;
+            border: 2px solid #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+            pointer-events: none;
+            transition: all 0.1s ease-out;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: none;
+            z-index: 1000;
+        }
+        .reticle.active {
+            display: block;
+        }
+
+        /* Pinned Reticle for Pending Comments */
+        .pinned-reticle {
+            position: absolute;
+            border: 2px dashed #f59e0b; /* Amber/Orange */
+            background-color: rgba(245, 158, 11, 0.1);
+            pointer-events: none;
+            border-radius: 4px;
+            box-sizing: border-box;
+            z-index: 999;
+        }
+        .pinned-badge {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #f59e0b;
+            color: white;
+            font-size: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Comment Input Box */
+        .comment-box {
+            position: absolute;
+            background: white;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            width: 300px;
+            pointer-events: auto;
+            display: none;
+            font-family: system-ui, -apple-system, sans-serif;
+            z-index: 1001;
+        }
+        .comment-box textarea {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            padding: 8px;
+            box-sizing: border-box;
+            resize: none;
+            font-family: inherit;
+        }
+        .comment-box button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .comment-box button:hover {
+            background-color: #2563eb;
+        }
+        .comment-box .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .comment-box button.cancel {
+            background-color: transparent;
+            color: #6b7280;
+        }
+        .comment-box button.cancel:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Debug Badge */
+        .debug-badge {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: #22c55e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* Sidebar / Review Panel */
+        .sidebar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            display: none; /* Hidden if 0 items */
+            font-family: system-ui, -apple-system, sans-serif;
+            pointer-events: auto;
+            z-index: 2000;
+        }
+        .sidebar-header {
+            background: #f9fafb;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-content {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .sidebar-item {
+            font-size: 13px;
+            color: #4b5563;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 8px;
+        }
+        .sidebar-item:last-child {
+            border-bottom: none;
+        }
+        .sidebar-footer {
+            padding: 10px 15px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        .btn-success {
+            background-color: #10b981 !important;
+            width: 100%;
+        }
+        .btn-success:hover {
+             background-color: #059669 !important;
+        }
+    `;
+    shadow.appendChild(style);
+
+    // --- HTML STUCTURES ---
+
+    // 1. Hover Reticle
+    const reticle = document.createElement('div');
+    reticle.className = 'reticle';
+    shadow.appendChild(reticle);
+
+    // 2. Container for Pinned Reticles (Visuals for queued comments)
+    const pinsContainer = document.createElement('div');
+    shadow.appendChild(pinsContainer);
+
+    // 3. Comment Input Box
+    const commentBox = document.createElement('div');
+    commentBox.className = 'comment-box';
+    commentBox.innerHTML = `
+        <textarea placeholder="Write a note..."></textarea>
+        <div class="actions">
+            <button class="cancel">Cancel</button>
+            <button class="submit">Add to Review</button>
+        </div>
+    `;
+    shadow.appendChild(commentBox);
+
+    // 4. Sidebar (Review Panel)
+    const sidebar = document.createElement('div');
+    sidebar.className = 'sidebar';
+    sidebar.innerHTML = `
+        <div class="sidebar-header">
+            <span>Pending Review</span>
+            <span class="count badge">0</span>
+        </div>
+        <div class="sidebar-content">
+            <!-- Items go here -->
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn-success submit-batch">Submit All</button>
+        </div>
+    `;
+    shadow.appendChild(sidebar);
+
+    // 5. Debug Badge
+    const badge = document.createElement('div');
+    badge.className = 'debug-badge';
+    badge.textContent = 'Preview Deploy';
+    shadow.appendChild(badge);
+
+    // --- STATE ---
+
+    let frozen = false;
+    let currentTarget = null;
+    let commentsQueue = [];
+
+    // --- RENDERERS ---
+
+    function renderSidebar() {
+        if (commentsQueue.length === 0) {
+            sidebar.style.display = 'none';
+            return;
+        }
+        sidebar.style.display = 'block';
+        shadow.querySelector('.sidebar .count').textContent = commentsQueue.length;
+
+        const list = shadow.querySelector('.sidebar-content');
+        list.innerHTML = '';
+        commentsQueue.forEach((c, idx) => {
+            const el = document.createElement('div');
+            el.className = 'sidebar-item';
+            el.textContent = \`#\${idx + 1}: \${c.text.substring(0, 50)}\${c.text.length > 50 ? '...' : ''}\`;
+            list.appendChild(el);
+        });
+    }
+
+    function renderPins() {
+        pinsContainer.innerHTML = '';
+        commentsQueue.forEach((c, idx) => {
+            if (!c.targetRect) return;
+            const pin = document.createElement('div');
+            pin.className = 'pinned-reticle';
+            pin.style.top = \`\${c.targetRect.top}px\`;
+            pin.style.left = \`\${c.targetRect.left}px\`;
+            pin.style.width = \`\${c.targetRect.width}px\`;
+            pin.style.height = \`\${c.targetRect.height}px\`;
+            
+            const badge = document.createElement('div');
+            badge.className = 'pinned-badge';
+            badge.textContent = idx + 1;
+            pin.appendChild(badge);
+            
+            pinsContainer.appendChild(pin);
+        });
+    }
+
+    // --- HIGHLIGHTER ---
+    
+    document.addEventListener('mousemove', (e) => {
+        if (frozen) return;
+        if (e.target === host) return;
+
+        currentTarget = e.target;
+        const rect = currentTarget.getBoundingClientRect();
+
+        reticle.style.top = \`\${rect.top}px\`;
+        reticle.style.left = \`\${rect.left}px\`;
+        reticle.style.width = \`\${rect.width}px\`;
+        reticle.style.height = \`\${rect.height}px\`;
+        reticle.classList.add('active');
+    }, { passive: true });
+
+    // --- CLICKS ---
+
+    document.addEventListener('click', (e) => {
+        // If clicking inside sidebar or comment box (which bubble to doc), ignore
+        // Actually, since these are in Shadow DOM with pointer-events:auto, they might bubble as coming from 'host'
+        // If the event target is inside our shadow root... wait, event retargeting makes e.target === host
+        
+        // This is tricky. In 'open' shadow dom, we can check e.composedPath()
+        const path = e.composedPath();
+        if (path.includes(commentBox) || path.includes(sidebar)) {
+            return; 
+        }
+
+        if (frozen) return; // Already editing
+        if (!currentTarget) return;
+        if (e.target === host) return;
+     
+        e.preventDefault();
+        e.stopPropagation();
+
+        startCommentMode(currentTarget);
+
+    }, { capture: true }); 
+
+    function startCommentMode(el) {
+        frozen = true;
+        
+        const rect = el.getBoundingClientRect();
+        
+        // Show Comment Box
+        commentBox.style.top = \`\${rect.bottom + 10}px\`; 
+        commentBox.style.left = \`\${rect.left}px\`;
+        if (rect.bottom + 150 > window.innerHeight) {
+            commentBox.style.top = \`\${rect.top - 150}px\`;
+        }
+        commentBox.style.display = 'block';
+        
+        setTimeout(() => shadow.querySelector('textarea').focus(), 50);
+    }
+
+    function cancelComment() {
+        shadow.querySelector('textarea').value = '';
+        commentBox.style.display = 'none';
+        frozen = false;
+        reticle.classList.remove('active');
+    }
+
+    // --- ACTIONS ---
+
+    shadow.querySelector('.cancel').addEventListener('click', cancelComment);
+
+    // "Add to Review"
+    shadow.querySelector('.submit').addEventListener('click', () => {
+        const text = shadow.querySelector('textarea').value;
+        if (!text) return;
+
+        // Add to Queue
+        const rect = currentTarget.getBoundingClientRect();
+        commentsQueue.push({
+            text: text,
+            context: currentTarget.outerHTML.slice(0, 300),
+            selector: currentTarget.tagName.toLowerCase(),
+            // Store rect just for visual pinning. Note: scroll will break this if we don't handle it, but fine for prototype
+            targetRect: {
+                top: rect.top + window.scrollY, // Adjust for scroll if we were using absolute... but host is fixed.
+                // Actually `host` is fixed position covering viewport. 
+                // `rect` from getBoundingClientRect is viewport relative.
+                // Our pins are also inside the fixed host. So we should use viewport coords.
+                // But if page scrolls, pins need to move?
+                // The current implementation uses Fixed Overlay. If you scroll, the pins will detach.
+                // FIX: For this prototype, we'll assume no scrolling or just accept it's glitchy on scroll.
+                top: rect.top, 
+                left: rect.left,
+                width: rect.width,
+                height: rect.height
+            }
+        });
+
+        renderSidebar();
+        renderPins();
+        cancelComment(); // Resets frozen state
+    });
+
+    // "Submit All"
+    shadow.querySelector('.submit-batch').addEventListener('click', () => {
+        if (commentsQueue.length === 0) return;
+
+        const btn = shadow.querySelector('.submit-batch');
+        const originalText = btn.textContent;
+        btn.textContent = 'Sending...';
+        btn.disabled = true;
+
+        const payload = {
+            batch: commentsQueue
+        };
+
+        fetch('http://localhost:3000/api/batch-comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Batch Success:', data);
+            commentsQueue = []; // Clear
+            renderSidebar();
+            renderPins();
+            alert('Batch submitted successfully!');
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Failed to send batch. Is server/extension running on 3000?');
+        })
+        .finally(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        });
+    });
+}
