@@ -314,7 +314,7 @@ function init() {
             return;
         }
 
-        fetch('http://localhost:3000/api/status')
+        fetch('http://localhost:3001/api/status')
             .then(res => res.json())
             .then(data => {
                 const tasks = data.tasks;
@@ -330,7 +330,12 @@ function init() {
                 });
                 if (changed) renderSidebar();
             })
-            .catch(console.error);
+            .catch(err => {
+                console.error("Polling error:", err);
+                // If failed consecutively, maybe mark items as failed? 
+                // For now just logging, but let's make sure we retry.
+                // Actually, if connection refused, we should probably warn user.
+            });
     }
 
     // --- RENDERERS ---
@@ -582,7 +587,7 @@ function init() {
             batch: [item] // Send as single-item batch to reuse endpoint
         };
 
-        fetch('http://localhost:3000/api/batch-comments', {
+        fetch('http://localhost:3001/api/batch-comments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
