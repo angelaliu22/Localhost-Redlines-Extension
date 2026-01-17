@@ -103,7 +103,7 @@
         .post {
             background: #ffffff;
             border: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 20px;
+            padding: 32px;
             border-radius: 12px;
             display: flex;
             gap: 18px;
@@ -378,6 +378,16 @@
             }
         ];
 
+        // Helper function to convert duration string to minutes
+        function durationToMinutes(duration) {
+            let minutes = 0;
+            const hourMatch = duration.match(/(\d+)h/);
+            const minMatch = duration.match(/(\d+)m/);
+            if (hourMatch) minutes += parseInt(hourMatch[1], 10) * 60;
+            if (minMatch) minutes += parseInt(minMatch[1], 10);
+            return minutes;
+        }
+
         // Compute top-level stats
         let totalGames = sampleGames.length;
         let yourGames = sampleGames.filter(g => g.white === 'You' || g.black === 'You').length;
@@ -385,6 +395,13 @@
         let draws = sampleGames.filter(g => g.result === '1/2-1/2').length;
         let totalMoves = sampleGames.reduce((sum, g) => sum + g.moves, 0);
         let avgMoves = Math.round(totalMoves / totalGames);
+        
+        // Find fastest game
+        let fastestGame = sampleGames.reduce((fastest, g) => {
+            const currentDuration = durationToMinutes(g.duration);
+            const fastestDuration = durationToMinutes(fastest.duration);
+            return currentDuration < fastestDuration ? g : fastest;
+        });
 
         // Render stats
         const statsEl = document.getElementById('stats');
@@ -393,7 +410,8 @@
             { number: yourGames, label: 'Your Games' },
             { number: yourWins, label: 'Your Wins' },
             { number: draws, label: 'Draws' },
-            { number: avgMoves, label: 'Avg Moves' }
+            { number: avgMoves, label: 'Avg Moves' },
+            { number: fastestGame.duration, label: 'Fastest Game' }
         ];
         statCards.forEach(card => {
             const div = document.createElement('div');
