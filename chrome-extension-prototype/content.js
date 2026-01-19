@@ -144,7 +144,38 @@ function init() {
             font-size: 12px;
             pointer-events: none;
             opacity: 0.8;
+            z-index: 2001;
         }
+
+        .box-model-legend {
+            position: fixed;
+            bottom: 40px;
+            left: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 11px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: none;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #374151;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
 
         .sidebar {
             position: fixed;
@@ -283,6 +314,17 @@ function init() {
     badge.className = 'debug-badge';
     badge.textContent = 'Localhost Redlines';
     shadow.appendChild(badge);
+
+    // 6. Box Model Legend
+    const legend = document.createElement('div');
+    legend.className = 'box-model-legend';
+    legend.innerHTML = `
+        <div class="legend-item"><div class="legend-color" style="background: rgba(249, 204, 157, 1)"></div>Margin</div>
+        <div class="legend-item"><div class="legend-color" style="background: rgba(243, 213, 129, 1)"></div>Border</div>
+        <div class="legend-item"><div class="legend-color" style="background: rgba(195, 230, 203, 1)"></div>Padding</div>
+        <div class="legend-item"><div class="legend-color" style="background: rgba(159, 188, 240, 1)"></div>Content</div>
+    `;
+    shadow.appendChild(legend);
 
     // --- STATE ---
 
@@ -554,7 +596,8 @@ function init() {
     shadow.querySelector('.cancel').addEventListener('click', cancelComment);
 
     // "Send to Agent"
-    shadow.querySelector('.submit').addEventListener('click', () => {
+    // "Send to Agent"
+    const submitComment = () => {
         const text = shadow.querySelector('textarea').value;
         if (!text) return;
 
@@ -607,5 +650,15 @@ function init() {
                 item.status = 'failed';
                 renderSidebar();
             });
+    };
+
+    shadow.querySelector('.submit').addEventListener('click', submitComment);
+
+    // Enter to Send
+    shadow.querySelector('textarea').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            submitComment();
+        }
     });
 }
