@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Localhost Redlines Extension",
+    "name": "Localhost UI Commentor",
     "version": "1.0",
     "description": "Prototype for commenting on localhost elements.",
     "icons": {

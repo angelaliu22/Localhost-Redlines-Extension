@@ -1,18 +1,18 @@
-console.log("[Localhost Redlines Extension] Loaded.");
+console.log("[Localhost UI Commentor] Loaded.");
 
-if (window.__antigravityOverlayLoaded) {
-    console.log("[Localhost Redlines Extension] Already loaded.");
+if (window.__uiCommentorOverlayLoaded) {
+    console.log("[Localhost UI Commentor] Already loaded.");
 } else {
-    window.__antigravityOverlayLoaded = true;
+    window.__uiCommentorOverlayLoaded = true;
     init();
 }
 
 function init() {
-    console.log("[Localhost Redlines Extension] Initializing Batch UI...");
+    console.log("[Localhost UI Commentor] Initializing Batch UI...");
 
     // Create the Shadow Host
     const host = document.createElement('div');
-    host.id = 'antigravity-overlay-host';
+    host.id = 'ui-commentor-overlay-host';
     Object.assign(host.style, {
         position: 'fixed',
         top: '0',
@@ -312,7 +312,7 @@ function init() {
     // 5. Debug Badge
     const badge = document.createElement('div');
     badge.className = 'debug-badge';
-    badge.textContent = 'Localhost Redlines';
+    badge.textContent = 'UI Commentor';
     shadow.appendChild(badge);
 
     // 6. Box Model Legend
@@ -502,7 +502,7 @@ function init() {
     document.addEventListener('mousemove', (e) => {
         if (frozen) return;
         // Don't highlight overlay itself
-        if (e.target === host || e.target.closest('#antigravity-overlay-host')) return;
+        if (e.target === host || e.target.closest('#ui-commentor-overlay-host')) return;
         // Don't highlight body/html
         if (e.target === document.body || e.target === document.documentElement) return;
 
@@ -525,7 +525,7 @@ function init() {
         if (frozen) return;
         if (!currentTarget) return;
         // Check exclusion
-        if (e.target === host || e.target.closest('#antigravity-overlay-host')) return;
+        if (e.target === host || e.target.closest('#ui-commentor-overlay-host')) return;
 
         e.preventDefault();
         e.stopPropagation();

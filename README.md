@@ -1,4 +1,4 @@
-# Localhost Redlines
+# Localhost UI Commentor
 
 A developer tool that allows you to add comments and redlines directly to your localhost web applications and send them to an AI agent in VS Code for processing.
 
@@ -11,7 +11,7 @@ This project consists of two main components:
     *   Provides tools to inspect the box model (margin, padding, border) and add comments.
     *   Sends feedback to the VS Code extension via a local server.
 
-2.  **VS Code Extension (`antigravity-bridge`)**:
+2.  **VS Code Extension (`localhost-ui-commentor-bridge`)**:
     *   Runs a local HTTP server (port 3001) to receive feedback from the Chrome extension.
     *   Queues incoming comments and sends them to the VS Code Chat Agent for action.
 
@@ -31,9 +31,9 @@ This extension acts as the bridge. You need to run this **inside VS Code**.
 2.  **Open Terminal**: Open the integrated terminal (`Ctrl+` `)`.
 3.  **Navigate to Extension Folder**:
     ```bash
-    cd vscode/extensions/antigravity-bridge
+    cd vscode/extensions/localhost-ui-commentor-bridge
     ```
-    *Current directory should end in `.../antigravity-bridge`*
+    *Current directory should end in `.../localhost-ui-commentor-bridge`*
 4.  **Install Dependencies**:
     ```bash
     npm install
@@ -54,18 +54,18 @@ This extension acts as the bridge. You need to run this **inside VS Code**.
     *   Navigate to where you cloned this repo.
     *   Select the **`chrome-extension-prototype`** folder.
     *   *Do NOT select the root folder, select the inner `chrome-extension-prototype` folder.*
-3.  **Verify**: You should see "Localhost Redlines Extension" in the list.
+3.  **Verify**: You should see "Localhost UI Commentor" in the list.
 
 ## Usage Guide
 
-1.  **Start the Backend**: Ensure the VS Code extension is running (you should see "Antigravity Bridge Extension v2.0 Activated" in the output channel).
+1.  **Start the Backend**: Ensure the VS Code extension is running (you should see "UI Commentor Bridge Extension v2.0 Activated" in the output channel).
 2.  **Open Your App**: Navigate to any localhost URL (e.g., `http://localhost:3000` or `http://127.0.0.1:5500`).
 3.  **Inspect**: Move your mouse over elements to see their box model details (margin, border, padding).
 4.  **Comment**: Click on an element to open a comment box.
 5.  **Send**: Type your feedback and click **"Send to Agent"** (or press Enter).
 6.  **Review**:
     *   In the browser, a sidebar will appear showing the status of your comments.
-    *   In VS Code, the "Antigravity Bridge" output channel will log the receipt.
+    *   In VS Code, the "UI Commentor Feedback" output channel will log the receipt.
     *   The Agent Chat will open with your feedback pre-populated.
 
 ## Troubleshooting
