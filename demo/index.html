@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Localhost Redliner — Interactive Demo</title>
+    <link rel="icon" href="icon.png">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card: #f8f9fa;
+            --muted: #6c757d;
+            --accent: #007bff;
+            --glass: rgba(0, 0, 0, 0.05)
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            font-family: Inter, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: #fafbfc;
+            color: #212529;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center
+        }
+
+        /* Demo banner */
+        .demo-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2147483646;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 12px 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .demo-banner strong {
+            font-size: 15px;
+        }
+
+        .demo-banner .separator {
+            width: 1px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .demo-banner .instructions {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .demo-banner a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .demo-banner a:hover {
+            text-decoration: underline;
+        }
+
+        .wrap {
+            width: 980px;
+            padding: 28px;
+            padding-top: 72px; /* Space for fixed banner */
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 32px
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .stats-section {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08)
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+            transform: translateY(-2px)
+        }
+
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 4px
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 18px
+        }
+
+        .post {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 36px;
+            border-radius: 12px;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+            cursor: pointer
+        }
+
+        .post:hover {
+            border-color: rgba(0, 123, 255, 0.25);
+            background: rgba(0, 123, 255, 0.02)
+        }
+
+        .board-img {
+            width: 240px;
+            height: 240px;
+            flex: 0 0 240px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f3f4f6;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            cursor: pointer
+        }
+
+        .post:hover .board-img {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12)
+        }
+
+        .board-img img {
+            display: block
+        }
+
+        .meta {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .meta h2 {
+            margin: 0;
+            font-size: 19px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #1a1a1a
+        }
+
+        .meta h2 span:first-child {
+            flex: 1;
+        }
+
+        .meta h2 span:last-child {
+            font-size: 12px;
+            font-weight: 400;
+            color: #888;
+            flex-shrink: 0;
+            white-space: nowrap
+        }
+
+        .meta h2 .score {
+            font-weight: 900;
+            font-size: 1.1em;
+            color: #007bff;
+            margin-left: 8px
+        }
+
+        .sub {
+            color: #6c757d;
+            font-size: 13px;
+            font-weight: 500;
+            margin: 0;
+            letter-spacing: 0.3px
+        }
+
+        .stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 8px 0;
+            margin: 2px 0 0 0
+        }
+
+        .stat {
+            background: rgba(0, 123, 255, 0.05);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #212529;
+            border: 1px solid rgba(0, 123, 255, 0.08);
+            transition: all 0.2s ease;
+            cursor: default
+        }
+
+        .stat:hover {
+            background: rgba(0, 123, 255, 0.08);
+            border-color: rgba(0, 123, 255, 0.15)
+        }
+
+        .pieces {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 4px
+        }
+
+        .pieces>div {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .pieces .list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 6px 10px 6px 6px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 6px;
+            align-items: center;
+            min-height: 32px;
+            justify-content: flex-start;
+            margin-left: 8px
+        }
+
+        .pieces .list span:only-child {
+            color: var(--muted);
+            font-size: 13px;
+            width: 100%
+        }
+
+        .pill {
+            background: transparent;
+            padding: 6px 8px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted)
+        }
+
+        footer {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 18px;
+            text-align: center
+        }
+
+        @media (max-width:880px) {
+            .wrap {
+                width: 100%;
+                padding: 16px;
+                padding-top: 72px;
+            }
+
+            .post {
+                flex-direction: column
+            }
+
+            .board-img {
+                width: 100%;
+                height: 320px
+            }
+
+            .demo-banner {
+                font-size: 12px;
+                padding: 10px 16px;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Demo banner -->
+    <div class="demo-banner">
+        <strong>Localhost Redliner — Interactive Demo</strong>
+        <div class="separator"></div>
+        <span class="instructions">Hover to inspect elements, click to leave a comment</span>
+        <div class="separator"></div>
+        <a href="https://github.com/angelaliu22/Localhost-Redlines-Extension" target="_blank">View on GitHub</a>
+    </div>
+
+    <div class="wrap">
+        <header>
+            <img src="icon.png" alt="Chess Feed icon" style="width:56px;height:56px;border-radius:12px;">
+            <div class="brand">
+                <h1>Chess Feed</h1>
+                <p>Recent chess games — final boards, captures, and scores</p>
+            </div>
+        </header>
+
+        <div id="stats" class="stats-section"></div>
+
+        <main class="feed" id="feed"></main>
+
+        <footer>This is a demo page for the Localhost Redliner extension. The real tool works on your own localhost pages.</footer>
+    </div>
+
+    <!-- Chess Feed rendering (from demo.html) -->
+    <script>
+        const sampleGames = [
+            {
+                id: 1, white: 'You', black: 'Ava', result: '1-0', moves: 42,
+                finalFEN: 'r1bq1rk1/pp2bppp/2n1pn2/2pp4/3P1B2/2NB1N2/PPP2PPP/R2Q1RK1 w - - 0 12',
+                duration: '38m', timestamp: 'Oct 10, 2023 at 2:45 PM'
+            },
+            {
+                id: 2, white: 'Ben', black: 'You', result: '0-1', moves: 67,
+                finalFEN: '8/5pp1/6k1/5P2/6p1/5K2/8/8 b - - 0 1',
+                duration: '1h 12m', timestamp: 'Oct 11, 2023 at 4:20 PM'
+            },
+            {
+                id: 3, white: 'You', black: 'Cara', result: '1/2-1/2', moves: 95,
+                finalFEN: '6k1/5pp1/4p2p/1P1pP3/8/5KP1/8/8 w - - 0 1',
+                duration: '2h 5m', timestamp: 'Oct 12, 2023 at 7:15 PM'
+            },
+            {
+                id: 4, white: 'Dan', black: 'Eva', result: '1-0', moves: 35,
+                finalFEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                duration: '25m', timestamp: 'Oct 13, 2023 at 11:30 AM'
+            },
+            {
+                id: 5, white: 'Frank', black: 'Gina', result: '0-1', moves: 50,
+                finalFEN: 'r3k2r/pppq1ppp/2np1n2/2b1p3/2B1P3/2NP1N2/PPPQ1PPP/R3K2R w KQkq - 0 8',
+                duration: '45m', timestamp: 'Oct 14, 2023 at 3:10 PM'
+            },
+            {
+                id: 6, white: 'You', black: 'Hana', result: '1-0', moves: 28,
+                finalFEN: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2NP1N2/PPP2PPP/R1BQK2R w KQkq - 0 6',
+                duration: '22m', timestamp: 'Oct 15, 2023 at 1:50 PM'
+            },
+            {
+                id: 7, white: 'Ian', black: 'Jill', result: '1/2-1/2', moves: 80,
+                finalFEN: '8/8/8/8/8/8/8/8 w - - 0 1',
+                duration: '1h 15m', timestamp: 'Oct 16, 2023 at 6:00 PM'
+            },
+            {
+                id: 8, white: 'You', black: 'Karl', result: '0-1', moves: 55,
+                finalFEN: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+                duration: '50m', timestamp: 'Oct 17, 2023 at 9:30 AM'
+            }
+        ];
+
+        function durationToMinutes(duration) {
+            let minutes = 0;
+            const hourMatch = duration.match(/(\d+)h/);
+            const minMatch = duration.match(/(\d+)m/);
+            if (hourMatch) minutes += parseInt(hourMatch[1], 10) * 60;
+            if (minMatch) minutes += parseInt(minMatch[1], 10);
+            return minutes;
+        }
+
+        let totalGames = sampleGames.length;
+        let yourGames = sampleGames.filter(g => g.white === 'You' || g.black === 'You').length;
+        let yourWins = sampleGames.filter(g => (g.white === 'You' && g.result === '1-0') || (g.black === 'You' && g.result === '0-1')).length;
+        let draws = sampleGames.filter(g => g.result === '1/2-1/2').length;
+        let totalMoves = sampleGames.reduce((sum, g) => sum + g.moves, 0);
+        let avgMoves = Math.round(totalMoves / totalGames);
+
+        let fastestGame = sampleGames.reduce((fastest, g) => {
+            return durationToMinutes(g.duration) < durationToMinutes(fastest.duration) ? g : fastest;
+        });
+
+        const statsEl = document.getElementById('stats');
+        [
+            { number: totalGames, label: 'Total Games' },
+            { number: yourGames, label: 'Your Games' },
+            { number: yourWins, label: 'Your Wins' },
+            { number: draws, label: 'Draws' },
+            { number: avgMoves, label: 'Avg Moves' },
+            { number: fastestGame.duration, label: 'Fastest Game' }
+        ].forEach(card => {
+            const div = document.createElement('div');
+            div.className = 'stat-card';
+            div.innerHTML = `<div class="number">${card.number}</div><div class="label">${card.label}</div>`;
+            statsEl.appendChild(div);
+        });
+
+        const pieceMap = {
+            'K': '\u2654', 'Q': '\u2655', 'R': '\u2656', 'B': '\u2657', 'N': '\u2658', 'P': '\u2659',
+            'k': '\u265A', 'q': '\u265B', 'r': '\u265C', 'b': '\u265D', 'n': '\u265E', 'p': '\u265F'
+        };
+
+        function parseFEN(fen) {
+            const board = [];
+            const rows = fen.split(' ')[0].split('/');
+            for (let r = 0; r < 8; r++) {
+                const row = [];
+                for (const ch of rows[r]) {
+                    if (/\d/.test(ch)) { for (let i = 0; i < parseInt(ch, 10); i++) row.push(null); }
+                    else row.push(ch);
+                }
+                board.push(row);
+            }
+            return board;
+        }
+
+        function countPieces(board) {
+            const counts = {};
+            for (const row of board) for (const p of row) if (p) counts[p] = (counts[p] || 0) + 1;
+            return counts;
+        }
+
+        const startingCounts = { P: 8, R: 2, N: 2, B: 2, Q: 1, K: 1, p: 8, r: 2, n: 2, b: 2, q: 1, k: 1 };
+
+        function computeCaptures(boardCounts) {
+            const captured = { white: [], black: [] };
+            ['p', 'r', 'n', 'b', 'q', 'k'].forEach(l => { for (let i = 0; i < (startingCounts[l] || 0) - (boardCounts[l] || 0); i++) captured.white.push(pieceMap[l]); });
+            ['P', 'R', 'N', 'B', 'Q', 'K'].forEach(l => { for (let i = 0; i < (startingCounts[l] || 0) - (boardCounts[l] || 0); i++) captured.black.push(pieceMap[l]); });
+            return captured;
+        }
+
+        function materialScore(boardCounts) {
+            const values = { P: 1, N: 3, B: 3, R: 5, Q: 9, p: 1, n: 3, b: 3, r: 5, q: 9 };
+            let white = 0, black = 0;
+            Object.keys(boardCounts).forEach(k => {
+                if (k === k.toUpperCase()) white += (values[k] || 0) * boardCounts[k];
+                else black += (values[k] || 0) * boardCounts[k];
+            });
+            return { white, black, diff: white - black };
+        }
+
+        function renderBoardToCanvas(fen, size = 240) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const board = parseFEN(fen);
+            const sq = size / 8;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    ctx.fillStyle = (r + c) % 2 === 0 ? '#f0d9b5' : '#b58863';
+                    ctx.fillRect(c * sq, r * sq, sq, sq);
+                    const p = board[r][c];
+                    if (p) {
+                        ctx.fillStyle = p === p.toUpperCase() ? '#fff' : '#000';
+                        ctx.font = Math.floor(sq * 0.7) + 'px serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(pieceMap[p] || '?', c * sq + sq / 2, r * sq + sq / 2 + sq * 0.03);
+                    }
+                }
+            }
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2; ctx.strokeRect(0, 0, size, size);
+            return canvas.toDataURL('image/png');
+        }
+
+        function renderPost(game) {
+            const post = document.createElement('article');
+            post.className = 'post';
+
+            const imgWrap = document.createElement('div');
+            imgWrap.className = 'board-img';
+            const img = document.createElement('img');
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+            img.alt = `Final board for game ${game.id}`;
+            img.src = renderBoardToCanvas(game.finalFEN, 480);
+            imgWrap.appendChild(img);
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const title = document.createElement('h2');
+            title.innerHTML = `<span><strong>${game.white} vs ${game.black}</strong> <span class="score">${game.result}</span></span><span style="font-size:14px;color:var(--muted);">${game.timestamp}</span>`;
+            const sub = document.createElement('div');
+            sub.className = 'sub';
+            sub.textContent = `${game.moves} moves \u00b7 ${game.duration}`;
+
+            const counts = countPieces(parseFEN(game.finalFEN));
+            const captures = computeCaptures(counts);
+            const mat = materialScore(counts);
+
+            const stats = document.createElement('div');
+            stats.className = 'stats';
+            [
+                `Material: White ${mat.white} \u00b7 Black ${mat.black}`,
+                `Result: ${game.result}`,
+                `Captures: ${captures.white.length + captures.black.length}`
+            ].forEach(t => { const s = document.createElement('div'); s.className = 'stat'; s.textContent = t; stats.appendChild(s); });
+
+            const leftLabel = document.createElement('div'); leftLabel.className = 'pill'; leftLabel.textContent = `${game.white} took:`;
+            const left = document.createElement('div'); left.className = 'list';
+            const rightLabel = document.createElement('div'); rightLabel.className = 'pill'; rightLabel.textContent = `${game.black} took:`;
+            const right = document.createElement('div'); right.className = 'list';
+            captures.white.forEach(p => { const e = document.createElement('span'); e.textContent = p; e.style.fontSize = '24px'; left.appendChild(e); });
+            captures.black.forEach(p => { const e = document.createElement('span'); e.textContent = p; e.style.fontSize = '24px'; right.appendChild(e); });
+            if (!captures.white.length) { const n = document.createElement('span'); n.textContent = 'No captures'; left.appendChild(n); }
+            if (!captures.black.length) { const n = document.createElement('span'); n.textContent = 'No captures'; right.appendChild(n); }
+
+            meta.appendChild(title); meta.appendChild(sub); meta.appendChild(stats);
+            meta.appendChild(leftLabel); meta.appendChild(left);
+            meta.appendChild(rightLabel); meta.appendChild(right);
+            post.appendChild(imgWrap); post.appendChild(meta);
+            return post;
+        }
+
+        const feed = document.getElementById('feed');
+        sampleGames.forEach(g => feed.appendChild(renderPost(g)));
+    </script>
+
+    <!-- Redliner overlay (from content.js, with mocked backend) -->
+    <script>
+        (function initRedlinerDemo() {
+            const host = document.createElement('div');
+            host.id = 'redliner-overlay-host';
+            Object.assign(host.style, {
+                position: 'fixed', top: '0', left: '0',
+                width: '100vw', height: '100vh',
+                pointerEvents: 'none',
+                zIndex: '2147483647',
+            });
+            document.body.appendChild(host);
+
+            const shadow = host.attachShadow({ mode: 'open' });
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .highlight-container {
+                    position: absolute; pointer-events: none; z-index: 1000;
+                    display: none; top: 0; left: 0; overflow: visible;
+                }
+                .highlight-container.active { display: block; }
+                .highlight-margin { position: absolute; background-color: rgba(249, 204, 157, 0.3); }
+                .highlight-border { position: absolute; background-color: rgba(243, 213, 129, 0.3); }
+                .highlight-padding { position: absolute; background-color: rgba(195, 230, 203, 0.3); }
+                .highlight-content { position: absolute; background-color: rgba(159, 188, 240, 0.3); }
+
+                .pinned-reticle {
+                    position: absolute; border: 2px dashed #f59e0b;
+                    background-color: rgba(245, 158, 11, 0.1);
+                    pointer-events: none; border-radius: 4px; box-sizing: border-box; z-index: 999;
+                }
+
+                .comment-box {
+                    position: absolute; background: white; border: 1px solid #e5e7eb;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                    padding: 12px; border-radius: 8px; width: 300px;
+                    pointer-events: auto; display: none;
+                    font-family: system-ui, -apple-system, sans-serif; z-index: 1001;
+                }
+                .comment-box textarea {
+                    width: 100%; height: 80px; border: 1px solid #d1d5db;
+                    border-radius: 4px; margin-bottom: 8px; padding: 8px;
+                    box-sizing: border-box; resize: none; font-family: inherit;
+                }
+                .comment-box button {
+                    background-color: #3b82f6; color: white; border: none;
+                    padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500;
+                }
+                .comment-box button:hover { background-color: #2563eb; }
+                .comment-box .actions { display: flex; justify-content: flex-end; gap: 8px; }
+                .comment-box button.cancel { background-color: transparent; color: #6b7280; }
+                .comment-box button.cancel:hover { background-color: #f3f4f6; }
+
+                .debug-badge {
+                    position: fixed; bottom: 10px; left: 10px;
+                    background: #22c55e; color: white; padding: 4px 8px;
+                    border-radius: 4px; font-size: 12px; pointer-events: none; opacity: 0.8; z-index: 2001;
+                }
+
+                .box-model-legend {
+                    position: fixed; bottom: 40px; left: 10px;
+                    background: white; border: 1px solid #e5e7eb;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                    padding: 8px; border-radius: 6px;
+                    font-family: system-ui, -apple-system, sans-serif;
+                    font-size: 11px; z-index: 2000;
+                    display: flex; flex-direction: column; gap: 4px; pointer-events: none;
+                }
+                .legend-item { display: flex; align-items: center; gap: 6px; color: #374151; }
+                .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+
+                .sidebar {
+                    position: fixed; bottom: 20px; right: 20px; width: 320px;
+                    background: #ffffff; border: 1px solid #e5e7eb;
+                    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+                    border-radius: 12px; overflow: hidden;
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                    pointer-events: auto; z-index: 2000;
+                    display: none; flex-direction: column;
+                }
+                .sidebar-header {
+                    background: #f9fafb; padding: 10px 15px;
+                    border-bottom: 1px solid #e5e7eb; font-weight: 600;
+                    display: flex; justify-content: space-between; align-items: center;
+                }
+                .sidebar-content { padding: 15px; max-height: 300px; overflow-y: auto; }
+                .sidebar-item {
+                    font-size: 13px; color: #374151; padding: 12px 16px;
+                    border-bottom: 1px solid #f3f4f6;
+                    display: flex; align-items: flex-start; gap: 10px;
+                }
+                .sidebar-item:last-child { border-bottom: none; }
+                .status-dot {
+                    width: 8px; height: 8px; border-radius: 50%;
+                    margin-top: 5px; flex-shrink: 0;
+                }
+                .status-sending { background-color: #9ca3af; animation: pulse 1.5s infinite; }
+                .status-working { background-color: #3b82f6; animation: pulse 1.5s infinite; }
+                .status-done { background-color: #10b981; }
+                .status-failed { background-color: #ef4444; }
+                .item-content { flex: 1; }
+                .item-text { font-weight: 500; margin-bottom: 2px; }
+                .item-meta { font-size: 11px; color: #9ca3af; }
+                @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+            `;
+            shadow.appendChild(style);
+
+            // Pinned reticles container
+            const pinsContainer = document.createElement('div');
+            Object.assign(pinsContainer.style, {
+                position: 'absolute', top: '0', left: '0',
+                width: '100%', height: '100%', pointerEvents: 'none'
+            });
+            shadow.appendChild(pinsContainer);
+
+            // Comment box
+            const commentBox = document.createElement('div');
+            commentBox.className = 'comment-box';
+            commentBox.innerHTML = `
+                <textarea placeholder="Write a note..."></textarea>
+                <div class="actions">
+                    <button class="cancel">Cancel</button>
+                    <button class="submit">Add Comment</button>
+                </div>
+            `;
+            shadow.appendChild(commentBox);
+
+            // Sidebar
+            const sidebar = document.createElement('div');
+            sidebar.className = 'sidebar';
+            sidebar.innerHTML = `
+                <div class="sidebar-header"><span>Activity Log</span></div>
+                <div class="sidebar-content"></div>
+            `;
+            shadow.appendChild(sidebar);
+
+            // Badge
+            const badge = document.createElement('div');
+            badge.className = 'debug-badge';
+            badge.textContent = 'Redliner (Demo)';
+            shadow.appendChild(badge);
+
+            // Legend
+            const legend = document.createElement('div');
+            legend.className = 'box-model-legend';
+            legend.innerHTML = `
+                <div class="legend-item"><div class="legend-color" style="background:rgba(249,204,157,1)"></div>Margin</div>
+                <div class="legend-item"><div class="legend-color" style="background:rgba(243,213,129,1)"></div>Border</div>
+                <div class="legend-item"><div class="legend-color" style="background:rgba(195,230,203,1)"></div>Padding</div>
+                <div class="legend-item"><div class="legend-color" style="background:rgba(159,188,240,1)"></div>Content</div>
+            `;
+            shadow.appendChild(legend);
+
+            // State
+            let frozen = false;
+            let currentTarget = null;
+            let activityLog = [];
+
+            // Sidebar renderer
+            function renderSidebar() {
+                if (!activityLog.length) { sidebar.style.display = 'none'; return; }
+                sidebar.style.display = 'flex';
+                const list = shadow.querySelector('.sidebar-content');
+                list.innerHTML = '';
+                [...activityLog].reverse().forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'sidebar-item';
+                    let statusClass = 'status-done';
+                    if (item.status === 'sending') statusClass = 'status-sending';
+                    el.innerHTML = `
+                        <div class="status-dot ${statusClass}"></div>
+                        <div class="item-content">
+                            <div class="item-text">${item.text}</div>
+                            <div class="item-meta">${item.status === 'done' ? 'Done (demo)' : 'Sending...'}</div>
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+            }
+
+            // Box model renderer
+            function renderBoxModel(rect, styles) {
+                const mt = parseFloat(styles.marginTop) || 0;
+                const mr = parseFloat(styles.marginRight) || 0;
+                const mb = parseFloat(styles.marginBottom) || 0;
+                const ml = parseFloat(styles.marginLeft) || 0;
+                const bt = parseFloat(styles.borderTopWidth) || 0;
+                const brw = parseFloat(styles.borderRightWidth) || 0;
+                const bb = parseFloat(styles.borderBottomWidth) || 0;
+                const bl = parseFloat(styles.borderLeftWidth) || 0;
+                const pt = parseFloat(styles.paddingTop) || 0;
+                const pr = parseFloat(styles.paddingRight) || 0;
+                const pb = parseFloat(styles.paddingBottom) || 0;
+                const pl = parseFloat(styles.paddingLeft) || 0;
+
+                const top = rect.top + window.scrollY;
+                const left = rect.left + window.scrollX;
+                const w = rect.width;
+                const h = rect.height;
+
+                let container = shadow.querySelector('.highlight-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.className = 'highlight-container';
+                    container.innerHTML = `
+                        <div class="highlight-margin"></div>
+                        <div class="highlight-border"></div>
+                        <div class="highlight-padding"></div>
+                        <div class="highlight-content"></div>
+                    `;
+                    shadow.appendChild(container);
+                }
+
+                const marginEl = container.querySelector('.highlight-margin');
+                marginEl.style.top = `${top - mt}px`; marginEl.style.left = `${left - ml}px`;
+                marginEl.style.width = `${w + ml + mr}px`; marginEl.style.height = `${h + mt + mb}px`;
+
+                const borderEl = container.querySelector('.highlight-border');
+                borderEl.style.top = `${top}px`; borderEl.style.left = `${left}px`;
+                borderEl.style.width = `${w}px`; borderEl.style.height = `${h}px`;
+
+                const paddingEl = container.querySelector('.highlight-padding');
+                paddingEl.style.top = `${top + bt}px`; paddingEl.style.left = `${left + bl}px`;
+                paddingEl.style.width = `${w - bl - brw}px`; paddingEl.style.height = `${h - bt - bb}px`;
+
+                const contentEl = container.querySelector('.highlight-content');
+                contentEl.style.top = `${top + bt + pt}px`; contentEl.style.left = `${left + bl + pl}px`;
+                contentEl.style.width = `${w - bl - brw - pl - pr}px`; contentEl.style.height = `${h - bt - bb - pt - pb}px`;
+
+                container.classList.add('active');
+            }
+
+            function hideBoxModel() {
+                const container = shadow.querySelector('.highlight-container');
+                if (container) container.classList.remove('active');
+            }
+
+            // Hover highlight
+            document.addEventListener('mousemove', (e) => {
+                if (frozen) return;
+                if (e.target === host || e.target.closest('#redliner-overlay-host')) return;
+                if (e.target === document.body || e.target === document.documentElement) return;
+                // Skip the demo banner
+                if (e.target.closest('.demo-banner')) return;
+
+                currentTarget = e.target;
+                renderBoxModel(currentTarget.getBoundingClientRect(), window.getComputedStyle(currentTarget));
+            }, { passive: true });
+
+            // Click to comment
+            document.addEventListener('click', (e) => {
+                if (e.metaKey || e.ctrlKey) return;
+                const path = e.composedPath();
+                if (path.includes(commentBox) || path.includes(sidebar)) return;
+                if (frozen) return;
+                if (!currentTarget) return;
+                if (e.target === host || e.target.closest('#redliner-overlay-host')) return;
+                if (e.target.closest('.demo-banner')) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+                startCommentMode(currentTarget);
+            }, { capture: true });
+
+            function startCommentMode(el) {
+                frozen = true;
+                hideBoxModel();
+
+                const rect = el.getBoundingClientRect();
+                const boxWidth = 320;
+                const boxHeight = 160;
+
+                let left = rect.left;
+                if (left + boxWidth > window.innerWidth) left = window.innerWidth - boxWidth - 20;
+                if (left < 10) left = 10;
+
+                let top = rect.bottom + 10;
+                if (top + boxHeight > window.innerHeight) {
+                    if (rect.top - boxHeight - 10 > 0) top = rect.top - boxHeight - 10;
+                    else top = window.innerHeight - boxHeight - 10;
+                }
+
+                commentBox.style.top = `${top}px`;
+                commentBox.style.left = `${left}px`;
+                commentBox.style.display = 'block';
+
+                const boxRect = document.createElement('div');
+                boxRect.className = 'pinned-reticle';
+                boxRect.style.top = `${rect.top + window.scrollY}px`;
+                boxRect.style.left = `${rect.left + window.scrollX}px`;
+                boxRect.style.width = `${rect.width}px`;
+                boxRect.style.height = `${rect.height}px`;
+                boxRect.id = 'temp-edit-rect';
+                shadow.appendChild(boxRect);
+
+                setTimeout(() => shadow.querySelector('textarea').focus(), 50);
+            }
+
+            function cancelComment() {
+                shadow.querySelector('textarea').value = '';
+                commentBox.style.display = 'none';
+                frozen = false;
+                const temp = shadow.getElementById('temp-edit-rect');
+                if (temp) temp.remove();
+            }
+
+            shadow.querySelector('.cancel').addEventListener('click', cancelComment);
+
+            const submitComment = () => {
+                const text = shadow.querySelector('textarea').value;
+                if (!text) return;
+
+                const item = {
+                    id: Date.now(),
+                    text: text,
+                    status: 'sending',
+                };
+
+                activityLog.push(item);
+                renderSidebar();
+                cancelComment();
+
+                // Mock: simulate the backend accepting the comment
+                setTimeout(() => {
+                    item.status = 'done';
+                    renderSidebar();
+                }, 600);
+            };
+
+            shadow.querySelector('.submit').addEventListener('click', submitComment);
+            shadow.querySelector('textarea').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); }
+            });
+        })();
+    </script>
+</body>
+
+</html>
