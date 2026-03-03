@@ -1,0 +1,42 @@
+{
+    "name": "localhost-redliner",
+    "displayName": "Localhost Redliner",
+    "description": "Mark up your localhost UI with comments and send them to VS Code's AI chat for action",
+    "version": "0.1.0",
+    "publisher": "localhost-redliner",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/angelaliu22/Localhost-Redlines-Extension.git"
+    },
+    "icon": "icon.png",
+    "engines": {
+        "vscode": "^1.93.0"
+    },
+    "scripts": {
+        "compile": "tsc -p .",
+        "watch": "tsc -w -p .",
+        "package": "vsce package"
+    },
+    "categories": [
+        "Testing"
+    ],
+    "keywords": [
+        "redliner",
+        "redline",
+        "localhost",
+        "UI feedback",
+        "comments",
+        "design review"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {},
+    "devDependencies": {
+        "@types/node": "^16.x",
+        "@types/vscode": "^1.93.0",
+        "typescript": "^5.3.3"
+    }
+}

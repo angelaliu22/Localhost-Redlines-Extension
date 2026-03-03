@@ -1,18 +1,18 @@
-console.log("[Localhost UI Commentor] Loaded.");
+console.log("[Localhost Redliner] Loaded.");
 
-if (window.__uiCommentorOverlayLoaded) {
-    console.log("[Localhost UI Commentor] Already loaded.");
+if (window.__redlinerOverlayLoaded) {
+    console.log("[Localhost Redliner] Already loaded.");
 } else {
-    window.__uiCommentorOverlayLoaded = true;
+    window.__redlinerOverlayLoaded = true;
     init();
 }
 
 function init() {
-    console.log("[Localhost UI Commentor] Initializing Batch UI...");
+    console.log("[Localhost Redliner] Initializing Batch UI...");
 
     // Create the Shadow Host
     const host = document.createElement('div');
-    host.id = 'ui-commentor-overlay-host';
+    host.id = 'redliner-overlay-host';
     Object.assign(host.style, {
         position: 'fixed',
         top: '0',
@@ -312,7 +312,7 @@ function init() {
     // 5. Debug Badge
     const badge = document.createElement('div');
     badge.className = 'debug-badge';
-    badge.textContent = 'UI Commentor';
+    badge.textContent = 'Redliner';
     shadow.appendChild(badge);
 
     // 6. Box Model Legend
@@ -502,7 +502,7 @@ function init() {
     document.addEventListener('mousemove', (e) => {
         if (frozen) return;
         // Don't highlight overlay itself
-        if (e.target === host || e.target.closest('#ui-commentor-overlay-host')) return;
+        if (e.target === host || e.target.closest('#redliner-overlay-host')) return;
         // Don't highlight body/html
         if (e.target === document.body || e.target === document.documentElement) return;
 
@@ -525,7 +525,7 @@ function init() {
         if (frozen) return;
         if (!currentTarget) return;
         // Check exclusion
-        if (e.target === host || e.target.closest('#ui-commentor-overlay-host')) return;
+        if (e.target === host || e.target.closest('#redliner-overlay-host')) return;
 
         e.preventDefault();
         e.stopPropagation();

@@ -1,80 +1,70 @@
-# Localhost UI Commentor
+# Localhost Redliner
 
-A developer tool that allows you to add comments and redlines directly to your localhost web applications and send them to an AI agent in VS Code for processing.
+Mark up your localhost UI with comments and send them straight to your IDE's AI Chat for action.
 
-## Project Structure
+![Localhost Redliner overview](screenshots/overview.png)
+![Comment box on an element](screenshots/comment-box.png)
+![Inspect element details](screenshots/inspect-element.png)
 
-This project consists of two main components:
+## How It Works
 
-1.  **Chrome Extension (`chrome-extension-prototype`)**:
-    *   Injects an overlay into localhost pages.
-    *   Provides tools to inspect the box model (margin, padding, border) and add comments.
-    *   Sends feedback to the VS Code extension via a local server.
+Localhost Redliner has two parts that work together:
 
-2.  **VS Code Extension (`localhost-ui-commentor-bridge`)**:
-    *   Runs a local HTTP server (port 3001) to receive feedback from the Chrome extension.
-    *   Queues incoming comments and sends them to the VS Code Chat Agent for action.
+1. **Chrome Extension** — adds an overlay to any localhost page. Hover to inspect elements (margin, padding, border), click to attach a comment.
+2. **VS Code Extension** — runs a local server on port 3001. When comments are submitted from Chrome, they appear in VS Code's Chat panel as prompts for your AI assistant to act on.
+
+The Chrome extension sends comments over HTTP to the VS Code extension. Both must be installed.
 
 ## Prerequisites
 
-*   Node.js & npm
-*   Google Chrome
-*   Visual Studio Code
+- [Node.js](https://nodejs.org/) (for building from source)
+- Google Chrome
+- Visual Studio Code with an AI Chat extension
 
-## Installation & Setup
+## Install
 
-### 1. Set up the VS Code Extension (The Backend)
+### VS Code Extension
 
-This extension acts as the bridge. You need to run this **inside VS Code**.
+Download `localhost-redliner-0.1.0.vsix` from the [Releases](https://github.com/angelaliu22/Localhost-Redlines-Extension/releases) page, then:
 
-1.  **Open the Project**: Open the root folder of this repository (`UI Editor Extension`) in VS Code.
-2.  **Open Terminal**: Open the integrated terminal (`Ctrl+` `)`.
-3.  **Navigate to Extension Folder**:
-    ```bash
-    cd vscode/extensions/localhost-ui-commentor-bridge
-    ```
-    *Current directory should end in `.../localhost-ui-commentor-bridge`*
-4.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-5.  **Run the Server**:
-    *   Press `F5` on your keyboard.
-    *   Select **"VS Code Extension Development"** if prompted.
-    *   A **new VS Code window** will open (this is the "Extension Development Host").
-    *   The extension is now running and listening on **port 3001**.
+1. Open VS Code
+2. `Cmd+Shift+P` (or `Ctrl+Shift+P`) → **Extensions: Install from VSIX...**
+3. Select the downloaded `.vsix` file
 
-### 2. Set up the Chrome Extension (The Frontend)
+The extension activates automatically and starts listening on port 3001.
 
-1.  **Open Chrome Extensions**:
-    *   Type `chrome://extensions` in your address bar.
-    *   Toggle **Developer mode** on (top right).
-2.  **Load the Extension**:
-    *   Click the **Load unpacked** button (top left).
-    *   Navigate to where you cloned this repo.
-    *   Select the **`chrome-extension-prototype`** folder.
-    *   *Do NOT select the root folder, select the inner `chrome-extension-prototype` folder.*
-3.  **Verify**: You should see "Localhost UI Commentor" in the list.
+### Chrome Extension
 
-## Usage Guide
+1. Download and unzip `chrome-extension-prototype.zip` from the [Releases](https://github.com/angelaliu22/Localhost-Redlines-Extension/releases) page
+2. Open `chrome://extensions` in Chrome
+3. Enable **Developer mode** (toggle in the top right)
+4. Click **Load unpacked** → select the unzipped folder
 
-1.  **Start the Backend**: Ensure the VS Code extension is running (you should see "UI Commentor Bridge Extension v2.0 Activated" in the output channel).
-2.  **Open Your App**: Navigate to any localhost URL (e.g., `http://localhost:3000` or `http://127.0.0.1:5500`).
-3.  **Inspect**: Move your mouse over elements to see their box model details (margin, border, padding).
-4.  **Comment**: Click on an element to open a comment box.
-5.  **Send**: Type your feedback and click **"Send to Agent"** (or press Enter).
-6.  **Review**:
-    *   In the browser, a sidebar will appear showing the status of your comments.
-    *   In VS Code, the "UI Commentor Feedback" output channel will log the receipt.
-    *   The Agent Chat will open with your feedback pre-populated.
+## Usage
+
+1. Make sure VS Code is open (the extension starts automatically)
+2. Open any `localhost` or `127.0.0.1` page in Chrome
+3. Hover over elements to see box model details (margin, border, padding)
+4. Click an element to open a comment box
+5. Type your comment and hit Enter
+6. The comment appears in VS Code's Chat panel, ready for your AI assistant to act on
+
+## Building from Source
+
+```bash
+npm install
+npm run compile
+npx @vscode/vsce package
+```
+
+This produces a `localhost-redliner-<version>.vsix` file you can install or share.
 
 ## Troubleshooting
 
-*   **"Failed" status in the browser sidebar**:
-    *   Ensure the VS Code extension is running.
-    *   Check if `http://localhost:3001/api/status` is accessible in your browser.
-    *   Check the VS Code Debug Console for any error messages.
+- **Comments not arriving in VS Code?** Make sure VS Code is open, then check that `http://localhost:3001/api/status` returns a response in your browser
+- **Port 3001 already in use?** Another process is using the port — stop it, then reload VS Code
+- **Overlay not appearing on your localhost page?** Refresh the page. The Chrome extension activates on `localhost` and `127.0.0.1` URLs
 
-*   **Extension not loading on page**:
-    *   Refresh your localhost page.
-    *   Ensure your URL matches `localhost` or `127.0.0.1`.
+## License
+
+MIT

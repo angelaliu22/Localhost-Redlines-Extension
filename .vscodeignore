@@ -1,0 +1,14 @@
+src/**
+node_modules/**
+chrome-extension-prototype/**
+.claude/**
+.git/**
+.vscode-test/**
+tsconfig.json
+tsconfig.tsbuildinfo
+.gitignore
+RELEASE.md
+**/*.ts
+**/*.map
+**/*.bak*
+*.vsix

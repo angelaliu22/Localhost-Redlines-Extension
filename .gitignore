@@ -22,6 +22,9 @@ out/
 dist/
 build/
 
+# Packaged extension
+*.vsix
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

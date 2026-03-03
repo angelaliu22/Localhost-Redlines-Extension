@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Localhost UI Commentor",
+    "name": "Localhost Redliner",
     "version": "1.0",
-    "description": "Prototype for commenting on localhost elements.",
+    "description": "Mark up your localhost UI with comments and send them to VS Code for action.",
     "icons": {
         "128": "icon.png"
     },
